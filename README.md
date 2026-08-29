@@ -1,74 +1,131 @@
-# Budgeting Web App (Next.js + Prisma + Auth.js)
+# BudgetPro - Personal Finance App
 
-A personal finance tracker / budgeting MVP built with:
+A full-stack personal finance management application with budgeting, savings tracking, analytics, and AI-powered assistance.
 
-- Next.js (App Router) + TypeScript
-- Tailwind CSS + Shadcn/ui components
-- Prisma ORM + PostgreSQL
-- Auth.js (NextAuth v5) with Credentials provider
-- Recharts for charts
-- Zod for validation
-- Sonner for toast notifications
-- Server Actions for mutations
+## Features
 
----
+### Core
+- **Authentication** - Secure register/login with JWT sessions (30-min timeout)
+- **Transactions** - Income/expense tracking with categories, search & date filters
+- **Budgets** - Monthly budgets per category with progress tracking
+- **Savings Goals** - Goals with targets, deadlines, progress tracking
+- **Bill Reminders** - Recurring bills; marking paid also records the expense transaction
+- **Debt Tracking** - Manage debts with progress and one-tap payments
+- **Assets** - Track cash, investments, property, vehicles
+- **CSV Export** - Export the visible transactions (formula-injection safe)
 
-## 🛠️ Setup
+### Analytics
+- Expense Pie Chart
+- Income vs Expense Bar Chart
+- Savings Trend Chart
+- Weekly Spending Chart
+- Month Comparison Chart
+- Balance Forecast Chart (3-month projection)
+- Summary Cards (Income, Expenses, Net Balance, Savings Rate)
 
-### 1) Install dependencies
+### AI Features
+- **AI Assistant** - Context-aware chatbot for financial advice (budgeting, saving, debt, investing, taxes). It uses your real financial snapshot (income, expenses, budget overruns, savings progress) when answering.
+- **AI Goal Suggestions** - Personalized recommendations based on financial data
+
+### Financial Tools
+- **Net Worth Calculator** - Total assets minus liabilities with breakdown
+- **Financial Health Score** - Gamified scoring (savings rate, budget compliance, debt, emergency fund, goals)
+- **Spending Alerts** - Notifications when approaching budget limits
+- **Financial Report** - Downloadable summary for the current month, last month, or year
+
+### Data
+- **Data Backup/Import** - AES-256-GCM encrypted exports, password-protected, transactional restore
+
+### UI/UX
+- **Theme Toggle** - Dark/light mode (persisted, next-themes)
+- **Responsive** - Mobile-friendly layout with skeleton loading states
+
+### Security
+- JWT authentication with bcrypt (12 rounds)
+- Server-side authorization on every mutation (session-scoped, ownership-checked)
+- Rate limiting on auth & backup endpoints (5 attempts / 15 min)
+- Security headers (CSP, X-Frame-Options, Referrer-Policy, Permissions-Policy)
+- Input validation with Zod on both client and server
+- Encrypted backups restore transactionally
+
+## Tech Stack
+
+Next.js 14 (App Router), React 18, TypeScript, Tailwind CSS v4, Prisma, PostgreSQL, NextAuth v4, Recharts, Sonner, React Hook Form + Zod, Vitest
+
+## Quick Start (Local Development)
+
 ```bash
 npm install
-```
-
-### 2) Environment Variables
-
-Create a `.env` file at project root with:
-
-```env
-DATABASE_URL="postgresql://USER:PASSWORD@HOST:PORT/DATABASE"
-NEXTAUTH_SECRET="a-very-secret-value"
-NEXTAUTH_URL="http://localhost:3000"
-```
-
-### 2a) Install PostgreSQL (Windows)
-
-1. Download and install PostgreSQL from EnterpriseDB:
-   https://www.enterprisedb.com/downloads/postgres-postgresql-downloads
-
-```cmd
-setx PATH "%PATH%;C:\Program Files\PostgreSQL\18\bin" /M
-```
-
-3. Restart your terminal after updating PATH.
-
-### 3) Prisma Setup
-
-Generate the Prisma client and apply migrations to your database:
-
-```bash
 npx prisma generate
-npx prisma migrate dev
 ```
 
-> If you want to run the migration without applying it, use:
-> `npx prisma migrate dev --name init --create-only`
+Create `.env` (see `.env.example`):
+```
+DATABASE_URL="postgresql://user:password@localhost:5432/budgetpro"
+NEXTAUTH_SECRET="generate-a-long-random-string"
+NEXTAUTH_URL="http://localhost:3000"
+NEXT_PUBLIC_APP_URL="http://localhost:3000"
+```
 
-### 4) Start Dev Server
+Migrate the schema and seed a demo user:
+```bash
+npx prisma db push
+npx prisma db seed        # or: node prisma/seed.ts (SEED_EMAIL / SEED_PASSWORD env vars override defaults)
+```
 
 ```bash
 npm run dev
 ```
 
-By default the app will run at `http://localhost:3000`.
-If port 3000 is already in use, Next.js will automatically try the next free port (e.g., `http://localhost:3001`).
+> The app requires PostgreSQL. For production, use a hosted database such as
+> Neon or Vercel Postgres and set `DATABASE_URL` to its pooled connection string.
 
----
+## Commands
 
-## ✅ Features
+| Command | Description |
+|---------|-------------|
+| `npm run dev` | Dev server |
+| `npm run build` | Production build |
+| `npm run start` | Production server |
+| `npm run lint` | ESLint check |
+| `npm run test` | Run tests (watch) |
+| `npm run test:coverage` | Run tests with coverage |
+| `npx prisma studio` | Database GUI |
+| `npx tsc --noEmit` | Type check |
 
-- Register / Login (email + password w/ bcrypt)
-- Protected dashboard routes
-- CRUD transactions + budgets
-- Analytics (pie + bar charts)
-- Budget progress + warnings
-- Toast notifications via Sonner
+## CI/CD
+
+GitHub Actions (`.github/workflows/ci-cd.yml`) runs lint, type check, unit
+tests, and a production build on every push/PR to `main`. On merges to `main`
+it deploys to Vercel via `amondnet/vercel-action`.
+
+Required GitHub secrets:
+
+| Secret | Description |
+|--------|-------------|
+| `DATABASE_URL` | Production PostgreSQL connection string |
+| `NEXTAUTH_SECRET` | Long random string for session encryption |
+| `NEXTAUTH_URL` | Production URL (e.g., `https://your-project.vercel.app`) |
+| `NEXT_PUBLIC_APP_URL` | Production URL (same as NEXTAUTH_URL) |
+| `VERCEL_TOKEN` | Vercel access token |
+| `VERCEL_ORG_ID` | Vercel team/org id |
+| `VERCEL_PROJECT_ID` | Vercel project id |
+
+## Deployment
+
+- **Platform**: Vercel (recommended)
+- **Build Command**: `npm run vercel-build` (runs `prisma generate && next build`)
+- **Output Directory**: `.next`
+
+### Environment Variables (Vercel)
+
+| Variable | Description |
+|----------|-------------|
+| `DATABASE_URL` | PostgreSQL connection string (use pooled Neon/Vercel Postgres) |
+| `NEXTAUTH_SECRET` | Random string for session encryption |
+| `NEXTAUTH_URL` | Production URL (e.g., `https://your-project.vercel.app`) |
+| `NEXT_PUBLIC_APP_URL` | Production URL (used for sitemap/robots metadata) |
+
+## License
+
+MIT

@@ -1,0 +1,5 @@
+{
+  "name": "budgetpro",
+  "buildCommand": "npm run vercel-build",
+  "outputDirectory": ".next"
+}

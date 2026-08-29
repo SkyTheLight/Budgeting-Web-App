@@ -9,4 +9,19 @@ out
 .DS_Store
 coverage
 /dist
-node_modules
+dev-server.log
+nul
+.vercel
+.env*.local
+
+# Local databases
+*.db
+*.db-journal
+*.sqlite
+prisma/dev.db
+
+# Schema is managed via `prisma db push`; no committed migration history yet
+prisma/migrations/
+
+# TypeScript build artifacts
+*.tsbuildinfo
